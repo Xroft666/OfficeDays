@@ -37,7 +37,7 @@ public class MovablePerson : AnimatedPerson
 	protected void Update()
 	{
 		if( personState == PersonState.PS_WALK )
-			transform.Translate(/*(float) direction * */speed * Time.deltaTime, 0f, 0f);
+			transform.Translate(speed * Time.deltaTime, 0f, 0f);
 	}
 
 	protected void Turn(  MoveDirection turnDirection )

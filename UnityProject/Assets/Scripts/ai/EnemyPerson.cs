@@ -14,9 +14,7 @@ public class EnemyPerson : ArmedPerson
 	
 	override public void TakeDamage( float damage, float dir )
 	{
-		Debug.Log("I am taking damage");
 		base.TakeDamage(damage, dir);
-		//transform.Translate( damage * dir, 0f, 0f );
 
 		isAlarmed = true;
 		Idle ();
@@ -29,7 +27,8 @@ public class EnemyPerson : ArmedPerson
     
     public void EyeSensorTrigger( Transform triggerReason )
 	{
-		Debug.Log("I see a target");
+		if( target != null )
+			return;
 
 		target = triggerReason;
 		isAlarmed = true;
@@ -39,7 +38,6 @@ public class EnemyPerson : ArmedPerson
 
 	IEnumerator Wander()
 	{
-		Debug.Log("Wandering");
 		while(!isAlarmed)
 		{
 			int decisionSeed = Random.Range(0, 3);
@@ -65,7 +63,6 @@ public class EnemyPerson : ArmedPerson
 
 	IEnumerator Shooting()
 	{
-		Debug.Log("Attacking");
 		while( target != null )
 		{
 			Vector3 dirVector = target.position - transform.position;
@@ -74,19 +71,25 @@ public class EnemyPerson : ArmedPerson
 			if( direction != checkDirection )
                 Turn( checkDirection );
 
-			if( dirVector.magnitude < gun.distance )
+			// the target is too far
+			if( dirVector.magnitude > gun.distance )
 			{
-				Debug.Log("Shooting");
-				gun.Fire(transform.position, (float) direction);
-				yield return StartCoroutine( gun.ReloadWeapon() );
-			}
-			else
-			{
-				Debug.Log("Getting closer");
 				Walk(direction);
 				yield return 0;
 			}
+			// the target is too close
+			else if (dirVector.magnitude < gun.minDistance )
+			{
+				Walk((MoveDirection)((int) direction * -1));
+				yield return 0;
+			}
+			// the target is in range
+			else
+			{
+				Idle();
+				gun.Fire(transform.position, (float) direction);
+				yield return StartCoroutine( gun.ReloadWeapon() );
+			}
 		}
 	}
-
 }

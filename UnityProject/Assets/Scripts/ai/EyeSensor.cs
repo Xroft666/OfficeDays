@@ -5,7 +5,7 @@ public class EyeSensor : MonoBehaviour {
 
 	public float distance = 3f;
 
-	void Start()
+	void Awake()
 	{
 		(collider2D as BoxCollider2D).center = new Vector2( distance * 0.5f, 0f);
 		(collider2D as BoxCollider2D).size = new Vector2( distance, 0.5f);

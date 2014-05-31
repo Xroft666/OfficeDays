@@ -41,7 +41,7 @@ public class Weapon
 		}
 
 		Debug.DrawLine(position + new Vector3(minDistance * direction, 0f, 0f), 
-		               position + new Vector3((distance - minDistance) * direction, 0f, 0f), 
+		               position + new Vector3((distance) * direction, 0f, 0f), 
 		               Color.red, 1f);
 	}
 	
