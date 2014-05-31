@@ -3,21 +3,22 @@ using System.Collections;
 
 public class EnemyPerson : ArmedPerson
 {
-	private bool isAlarmed = false;
-	private Transform target = null;
-
-	new void Start()
+	private enum ActionState
 	{
-		base.Start ();
-		StartCoroutine( Wander () );
+		AS_WANDERING,
+		AS_SHOOTING
 	}
-	
+
+	private Transform target = null;
+	private ActionState currentState = ActionState.AS_WANDERING;
+
 	override public void TakeDamage( float damage, float dir )
 	{
 		base.TakeDamage(damage, dir);
 
-		isAlarmed = true;
-		Idle ();
+		//Idle ();
+		if( target != null )
+			return;
 
 		MoveDirection checkDirection = (MoveDirection) (-dir);
 
@@ -31,14 +32,38 @@ public class EnemyPerson : ArmedPerson
 			return;
 
 		target = triggerReason;
-		isAlarmed = true;
 		Idle ();
-		StartCoroutine( Shooting() );
+	}
+
+	new void Start()
+	{
+		base.Start();
+		StartCoroutine( "Wander" );
+	}
+
+	new void Update()
+	{
+		base.Update();
+
+		// states controller
+		if( currentState == ActionState.AS_WANDERING && target != null )
+		{
+			currentState = ActionState.AS_SHOOTING;
+			StopCoroutine( "Wander" );
+			StartCoroutine( "Shooting" );
+		}
+
+		if( currentState == ActionState.AS_SHOOTING && target == null )
+		{
+			currentState = ActionState.AS_WANDERING;
+			StopCoroutine( "Shooting" );
+			StartCoroutine( "Wander" );
+		}
 	}
 
 	IEnumerator Wander()
 	{
-		while(!isAlarmed)
+		while( true )
 		{
 			int decisionSeed = Random.Range(0, 3);
 
@@ -63,7 +88,7 @@ public class EnemyPerson : ArmedPerson
 
 	IEnumerator Shooting()
 	{
-		while( target != null )
+		while( true )
 		{
 			Vector3 dirVector = target.position - transform.position;
 			MoveDirection checkDirection = dirVector.x > 0 ? MoveDirection.MD_RIGHT : MoveDirection.MD_LEFT;
